@@ -46,7 +46,22 @@ const render = (vdom, container) => {
   console.log('render: ');
   console.log(vdom);
 
-  container.innerHTML = `<pre>${JSON.stringify(vdom, null, 2)}</pre>`;
+  const dom = vdom.type === 'TEXT' ? document.createTextNode('') : document.createElement(vdom.type);
+
+  Object.keys(vdom.props)
+        .filter(key => key !== 'children')
+        .forEach(name => {
+          dom[name] = vdom.props[name];
+        })
+
+  vdom.props.children.forEach(child => {
+    render(child, dom);
+  });
+
+  container.appendChild(dom);
+
+  // print out vdom to html page
+  // container.innerHTML = `<pre>${JSON.stringify(vdom, null, 2)}</pre>`;
 };
 
 // eslint-disable-next-line
