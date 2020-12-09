@@ -2,14 +2,14 @@
 // import ReactDOM from 'react-dom';
 // React.createElement('h1', null, 'Hello React'),
 
-// utilize self-defined createElement & render
+// utilize self-defined createElement & render, both functions are all mounted to core/index.js
 import React from './core';
 const ReactDOM = React;
 
 const element = (
-  <div>
+  <div className="virtual-dom">
     <h2>React Core Principle</h2>
-    <p>Elaborate the core concept of Reactjs</p>
+    <p id="core">Elaborate the core concept of Reactjs</p>
     <a href="https://create-react-app.dev/">Official Website</a>
   </div>
 );
