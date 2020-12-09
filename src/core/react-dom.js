@@ -68,6 +68,34 @@ const render = (vdom, container) => {
   // container.innerHTML = `<pre>${JSON.stringify(vdom, null, 2)}</pre>`; // print out vdom to html page
 };
 
+// next unit of work, we will initialize first task with render
+let nextUnitOfWork = null;
+
+/**
+ * Dispatch diff or render tasks 
+ * 
+ * @param {*} deadline 
+ */
+const workLoop = (deadline) => {
+  // performUnitOfWork while we still have work and current timeframe is still existing
+  while (nextUnitOfWork && deadline.timeRemaining() > 1) {
+    nextUnitOfWork = performUnitOfWork(nextUnitOfWork);
+  }
+
+  window.requestIdleCallback(workLoop);
+};
+
+window.requestIdleCallback(workLoop);
+
+/**
+ * Retrieve nextUnitOfWork by current work
+ * 
+ * @param {*} fiber 
+ */
+const performUnitOfWork = (fiber) => {
+
+}
+
 // eslint-disable-next-line
 export default {
   render
