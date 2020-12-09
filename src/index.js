@@ -3,8 +3,8 @@
 // React.createElement('h1', null, 'Hello React'),
 
 // utilize self-defined createElement & render, both functions are all mounted to core/index.js
-import React from './core';
-const ReactDOM = React;
+import React from './core/react';
+import ReactDOM from './core/react-dom';
 
 const element = (
   <div className="virtual-dom">

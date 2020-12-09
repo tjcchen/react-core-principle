@@ -1,43 +1,5 @@
 /**
- * Create Text Virtual DOM Element
- * 
- * @param {*} text text innerHTML
- */
-const createTextElement = (text) => {
-  return {
-    type: 'TEXT',
-    props: {
-      nodeValue: text,
-      children: []
-    }
-  }
-};
-
-/**
- * Self-defined React.createElement() function
- * 
- * @param {*} type 
- * @param {*} props 
- * @param  {...any} children 
- */
-const createElement = (type, props, ...children) => {  console.log('[createElement]: ');
-  delete props.__source;
-  delete props.__self;
-
-  return {
-    type,
-    props: {
-      ...props,
-      // put children into props, therefore we can obtain children by this.props.children
-      children: children.map(child => {
-        return typeof child === 'object' ? child : createTextElement(child);
-      })
-    }
-  };
-};
-
-/**
- * Self-defined ReactDOM.render() function. A virtual dom tree looks like this:
+ * Convert virtual DOM tree to real DOM nodes with render function. A virtual dom tree looks like this:
  * {
  *   "type": "div",
  *   "props": {
@@ -74,13 +36,15 @@ const createElement = (type, props, ...children) => {  console.log('[createEleme
  *      ]
  *   }
  * }
+ */
+
+/**
+ * A self-defined ReactDOM.render() function.
  * 
  * @param {*} vdom 
  * @param {*} container
  */
 const render = (vdom, container) => {
-  console.log('[render]: ');
-
   // create real dom element by virtual dom type
   const dom = vdom.type.toUpperCase() === 'TEXT' ? document.createTextNode('') : document.createElement(vdom.type);
 
@@ -101,12 +65,10 @@ const render = (vdom, container) => {
 
   container.appendChild(dom);
 
-  // print out vdom to html page
-  // container.innerHTML = `<pre>${JSON.stringify(vdom, null, 2)}</pre>`;
+  // container.innerHTML = `<pre>${JSON.stringify(vdom, null, 2)}</pre>`; // print out vdom to html page
 };
 
 // eslint-disable-next-line
 export default {
-  createElement,
   render
 };
