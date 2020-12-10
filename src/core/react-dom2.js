@@ -4,8 +4,10 @@
 
 // nextUnitOfWork, we will initialize first task with render
 let nextUnitOfWork = null;
-// work in progress root, this is used to memorize working fiber root
+// work in progress root node, this is to memorize working fiber root
 let wipRoot        = null;
+// current working node, this is to memorize working node
+let currentRoot    = null;
 
 /**
  * Create real dom node with virtual dom
@@ -42,7 +44,8 @@ const render = (vdom, container) => {
     dom: container,
     props: {
       children: [vdom]
-    }
+    },
+    base: currentRoot // store previous fiber node
   };
 
   nextUnitOfWork = wipRoot;
@@ -60,6 +63,7 @@ const render = (vdom, container) => {
 const commitRoot = () => {
   commitWorker(wipRoot.child);
 
+  currentRoot = wipRoot;
   wipRoot = null;
 };
 
@@ -78,7 +82,7 @@ const commitWorker = (fiber) => {
 
   commitWorker(fiber.child);
   commitWorker(fiber.sibling);
-}
+};
 
 /**
  * Dispatch diff or render tasks 
@@ -101,6 +105,37 @@ const workLoop = (deadline) => {
 
 // start idle callback with workloop
 window.requestIdleCallback(workLoop);
+
+/**
+ * reconcile working in progress fiber and children fibers
+ * 
+ * @param {*} wipFiber work in progress fiber
+ * @param {*} elements children fibers
+ */
+const reconcileChildren = (wipFiber, elements) => {
+  let index = 0;
+  let prevSibling = null;
+
+  // build fiber tree with while loop
+  while (index < elements.length) {
+    let element = elements[index];
+    const newFiber = {
+      type: element.type,
+      props: element.props,
+      parent: wipFiber,
+      dom: null
+    };
+
+    if (index === 0 ) {
+      wipFiber.child = newFiber;
+    } else {
+      prevSibling.sibling = newFiber;
+    }
+
+    prevSibling = wipFiber;
+    index++;
+  }
+};
 
 /**
  * Retrieve nextUnitOfWork by current fiber. 
@@ -134,28 +169,8 @@ const performUnitOfWork = (fiber) => {
 
   const elements = fiber.props.children;
 
-  let index = 0;
-  let prevSibling = null;
-
-  // build fiber tree with while loop
-  while (index < elements.length) {
-    let element = elements[index];
-    const newFiber = {
-      type: element.type,
-      props: element.props,
-      parent: fiber,
-      dom: null
-    };
-
-    if (index === 0 ) {
-      fiber.child = newFiber;
-    } else {
-      prevSibling.sibling = newFiber;
-    }
-
-    prevSibling = fiber;
-    index++;
-  }
+  // reconcile current fiber with children fibers
+  reconcileChildren(fiber, elements);
 
   // find nextUnitOfWork, we start with child
   if (fiber.child) {
@@ -173,6 +188,8 @@ const performUnitOfWork = (fiber) => {
     nextFiber = nextFiber.parent;
   }
 };
+
+
 
 // eslint-disable-next-line
 export default {
