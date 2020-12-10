@@ -4,6 +4,8 @@
 
 // nextUnitOfWork, we will initialize first task with render
 let nextUnitOfWork = null;
+// work in progress root, this is used to memorize working fiber root
+let wipRoot        = null;
 
 /**
  * Create real dom node with virtual dom
@@ -36,12 +38,14 @@ const createDom = (vdom) => {
 const render = (vdom, container) => {
 
   // simple fiber tree
-  nextUnitOfWork = {
+  wipRoot = {
     dom: container,
     props: {
       children: [vdom]
     }
   };
+
+  nextUnitOfWork = wipRoot;
   
   // recursively append virtual dom children elements to parent node, parent node refers to current DOM node
   // vdom.props.children.forEach(child => {
@@ -49,6 +53,32 @@ const render = (vdom, container) => {
   // });
   // container.appendChild(dom);
 };
+
+/**
+ * Commit root fiber node
+ */
+const commitRoot = () => {
+  commitWorker(wipRoot.child);
+
+  wipRoot = null;
+};
+
+/**
+ * Commit each fiber node, including child, sibling etc. This function actually to build dom tree
+ * 
+ * @param {*} fiber 
+ */
+const commitWorker = (fiber) => {
+  if (!fiber) {
+    return;
+  }
+
+  const domParent = fiber.parent.dom;
+  domParent.appendChild(fiber.dom);
+
+  commitWorker(fiber.child);
+  commitWorker(fiber.sibling);
+}
 
 /**
  * Dispatch diff or render tasks 
@@ -61,6 +91,11 @@ const workLoop = (deadline) => {
     nextUnitOfWork = performUnitOfWork(nextUnitOfWork);
   }
 
+  // commit root when we do not have nextUnitOfWork and wipRoot still exits
+  if (!nextUnitOfWork && wipRoot) {
+    commitRoot();
+  }
+
   window.requestIdleCallback(workLoop);
 };
 
@@ -68,7 +103,8 @@ const workLoop = (deadline) => {
 window.requestIdleCallback(workLoop);
 
 /**
- * Retrieve nextUnitOfWork by current fiber
+ * Retrieve nextUnitOfWork by current fiber. 
+ * 
  * nextUnitOfWork = {
  *   dom: container,
  *   props: {
@@ -91,10 +127,10 @@ const performUnitOfWork = (fiber) => {
     fiber.dom = createDom(fiber);
   }
 
-  // append current fiber node when fiber has parent
-  if (fiber.parent) {
-    fiber.parent.dom.appendChild(fiber.dom);
-  }
+  // append current fiber node when fiber has parent, this is real dom manipulation
+  // if (fiber.parent) {
+  //   fiber.parent.dom.appendChild(fiber.dom);
+  // }
 
   const elements = fiber.props.children;
 
