@@ -68,14 +68,75 @@ const workLoop = (deadline) => {
 window.requestIdleCallback(workLoop);
 
 /**
- * Retrieve nextUnitOfWork by current work
+ * Retrieve nextUnitOfWork by current fiber
+ * nextUnitOfWork = {
+ *   dom: container,
+ *   props: {
+ *     children: [vdom]
+ *   }
+ *  };
+ * 
+ * fiber = {
+ *   dom: 'self node'
+ *   parent: 'parent node'
+ *   child: 'first child node'
+ *   sibling: 'sibling node'
+ * };
  * 
  * @param {*} fiber 
  */
 const performUnitOfWork = (fiber) => {
-  
-  
-}
+  // createDom with fiber if fiber.dom does not exist
+  if (!fiber.dom) {
+    fiber.dom = createDom(fiber);
+  }
+
+  // append current fiber node when fiber has parent
+  if (fiber.parent) {
+    fiber.parent.dom.appendChild(fiber.dom);
+  }
+
+  const elements = fiber.props.children;
+
+  let index = 0;
+  let prevSibling = null;
+
+  // build fiber tree with while loop
+  while (index < elements.length) {
+    let element = elements[i];
+    const newFiber = {
+      type: element.type,
+      props: element.props,
+      parent: fiber,
+      dom: null
+    };
+
+    if (index === 0 ) {
+      fiber.child = newFiber;
+    } else {
+      prevSibling.sibling = newFiber;
+    }
+
+    prevSibling = fiber;
+    index++;
+  }
+
+  // find nextUnitOfWork, we start with child
+  if (fiber.child) {
+    return fiber.child;
+  }
+
+  // if child does not exist, we find sibling element
+  let nextFiber = fiber;
+  while (nextFiber) {
+    if (nextFiber.siblings) {
+      return nextFiber.sibling;
+    }
+
+    // if we do not have sibling element either, find parent element
+    nextFiber = newFiber.parent;
+  }
+};
 
 // eslint-disable-next-line
 export default {
