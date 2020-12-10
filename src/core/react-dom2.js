@@ -288,22 +288,18 @@ const performUnitOfWork = (fiber) => {
   console.log('performUnitOfWork: ');
   console.log(fiber);
 
-  // createDom with fiber if fiber.dom does not exist
-  if (!fiber.dom) {
-    fiber.dom = createDom(fiber);
+  // add functional component support
+  const isFunctionalComponent = fiber.type instanceof Function;
+
+  if (isFunctionalComponent) {
+    updateFunctionalComponent(fiber); // functional component
+  } else {
+    updateRegularComponent(fiber); // regular html dom component
   }
 
-  // append current fiber node when fiber has parent, this is real dom manipulation
-  // if (fiber.parent) {
-  //   fiber.parent.dom.appendChild(fiber.dom);
-  // }
-
-  const elements = fiber.props.children;
-
-  // reconcile current fiber with children fibers
-  reconcileChildren(fiber, elements);
-
-  // find nextUnitOfWork, we start with child
+  //-------------------------------------------------
+  // find nextUnitOfWork, we start with child node
+  //-------------------------------------------------
   if (fiber.child) {
     return fiber.child;
   }
@@ -318,6 +314,39 @@ const performUnitOfWork = (fiber) => {
     // if we do not have sibling element either, find parent element
     nextFiber = nextFiber.parent;
   }
+};
+
+/**
+ * Update functional component
+ * 
+ * @param {*} fiber 
+ */
+const updateFunctionalComponent = (fiber) => {
+  const children = [fiber.type(fiber.props)]; // fiber.type is function already
+
+  reconcileChildren(fiber, children);
+};
+
+/**
+ * Update regular html component
+ * 
+ * @param {*} fiber 
+ */
+const updateRegularComponent = (fiber) => {
+  // createDom with fiber if fiber.dom does not exist
+  if (!fiber.dom) {
+    fiber.dom = createDom(fiber);
+  }
+
+  // append current fiber node when fiber has parent, this is real dom manipulation
+  // if (fiber.parent) {
+  //   fiber.parent.dom.appendChild(fiber.dom);
+  // }
+
+  const elements = fiber.props.children;
+
+  // reconcile current fiber with children fibers
+  reconcileChildren(fiber, elements);
 };
 
 // eslint-disable-next-line
