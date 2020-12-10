@@ -17,8 +17,6 @@ let deletions      = [];
  * @param {*} vdom 
  */
 const createDom = (vdom) => {
-  console.log('createDom: ');
-
   // create real dom element by virtual dom type
   const dom = vdom.type.toUpperCase() === 'TEXT' ? document.createTextNode('') : document.createElement(vdom.type);
 
@@ -50,8 +48,6 @@ const createDom = (vdom) => {
  * @param {*} nextProps 
  */
 const updateDom = (dom, prevProps, nextProps) => {
-  console.log('updateDom: ');
-
   // old node props
   Object.keys(prevProps)
         .filter(name => name !== 'children')
@@ -83,8 +79,6 @@ const updateDom = (dom, prevProps, nextProps) => {
  * @param {*} container
  */
 const render = (vdom, container) => {
-  console.log('render dom element');
-
   // simple fiber tree
   wipRoot = {
     dom: container,
@@ -107,8 +101,6 @@ const render = (vdom, container) => {
  * Commit root fiber node
  */
 const commitRoot = () => {
-  console.log('commitRoot');
-
   // delete fiber nodes in deletions with commitWork
   deletions.forEach(commitWork);
 
@@ -175,8 +167,6 @@ const commitDeletion = (fiber, domParent) => {
  * @param {*} deadline 
  */
 const workLoop = (deadline) => {
-  console.log('work loop: ');
-
   // performUnitOfWork while we still have work and current timeframe is still existing,
   // we didn't consider deadline.didTimeout at this time, will resolve it later
   while (nextUnitOfWork && deadline.timeRemaining() > 1) {
@@ -210,8 +200,6 @@ window.requestIdleCallback(workLoop);
  * @param {*} elements children fibers
  */
 const reconcileChildren = (wipFiber, elements) => {
-  console.log('reconcileChildren: ');
-
   let index = 0;
   let prevSibling = null;
   let oldFiber = wipFiber.base && wipFiber.base.child;
@@ -302,7 +290,6 @@ const performUnitOfWork = (fiber) => {
 
   // createDom with fiber if fiber.dom does not exist
   if (!fiber.dom) {
-    console.log('---------fiber.dom does not exist-----------');
     fiber.dom = createDom(fiber);
   }
 
