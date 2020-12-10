@@ -4,7 +4,7 @@
 
 // utilize self-defined createElement & render, both functions are all mounted to core/index.js
 import React from './core/react';
-import ReactDOM from './core/react-dom';
+import ReactDOM from './core/react-dom2';
 
 const element = (
   <div className="virtual-dom">

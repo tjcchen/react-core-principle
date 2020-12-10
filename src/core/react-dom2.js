@@ -139,7 +139,7 @@ const performUnitOfWork = (fiber) => {
 
   // build fiber tree with while loop
   while (index < elements.length) {
-    let element = elements[i];
+    let element = elements[index];
     const newFiber = {
       type: element.type,
       props: element.props,
@@ -170,7 +170,7 @@ const performUnitOfWork = (fiber) => {
     }
 
     // if we do not have sibling element either, find parent element
-    nextFiber = newFiber.parent;
+    nextFiber = nextFiber.parent;
   }
 };
 
