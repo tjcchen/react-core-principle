@@ -288,11 +288,11 @@ const performUnitOfWork = (fiber) => {
   console.log('performUnitOfWork: ');
   console.log(fiber);
 
-  // add functional component support
-  const isFunctionalComponent = fiber.type instanceof Function;
+  // add function component support
+  const isFunctionComponent = fiber.type instanceof Function;
 
-  if (isFunctionalComponent) {
-    updateFunctionalComponent(fiber); // functional component
+  if (isFunctionComponent) {
+    updateFunctionComponent(fiber); // function component
   } else {
     updateRegularComponent(fiber); // regular html dom component
   }
@@ -317,11 +317,11 @@ const performUnitOfWork = (fiber) => {
 };
 
 /**
- * Update functional component
+ * Update function component
  * 
  * @param {*} fiber 
  */
-const updateFunctionalComponent = (fiber) => {
+const updateFunctionComponent = (fiber) => {
   const children = [fiber.type(fiber.props)]; // fiber.type is function already
 
   reconcileChildren(fiber, children);
