@@ -54,7 +54,7 @@ const updateDom = (dom, prevProps, nextProps) => {
         .filter(name => !(name in nextProps))
         .forEach(name => {
           if (name.slice(0, 2) === 'on') {
-            dom.removeEventListener(name.slice(0, 2).toLowerCase(), prevProps[name], false);
+            dom.removeEventListener(name.slice(2).toLowerCase(), prevProps[name], false);
           } else {
             dom[name] = '';
           }
@@ -65,7 +65,7 @@ const updateDom = (dom, prevProps, nextProps) => {
         .filter(name => name !== 'children')
         .forEach(name => {
           if (name.slice(0, 2) === 'on') {
-            dom.addEventListener(name.slice(0, 2).toLowerCase(), prevProps[name], false);
+            dom.addEventListener(name.slice(2).toLowerCase(), nextProps[name], false);
           } else {
             dom[name] = nextProps[name];
           }

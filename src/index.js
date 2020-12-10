@@ -8,7 +8,7 @@ import ReactDOM from './core/react-dom2';
 
 const element = (
   <div className="virtual-dom">
-    <h2>React Core Principle</h2>
+    <h2 onClick={ () => alert(2) }>React Core Principle</h2>
     <p id="core">Elaborate the core concept of Reactjs</p>
     <a href="https://create-react-app.dev/">Official Website</a>
   </div>
