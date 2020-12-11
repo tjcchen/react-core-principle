@@ -56,9 +56,9 @@ const updateDom = (dom, prevProps, nextProps) => {
         .filter(name => name !== 'children')
         .filter(name => !(name in nextProps))
         .forEach(name => {
-          if (name.slice(0, 2) === 'on') {
+          if (name.slice(0, 2) === 'on') { // handle click event
             dom.removeEventListener(name.slice(2).toLowerCase(), prevProps[name], false);
-          } else {
+          } else { // mount dom properties
             dom[name] = '';
           }
         });
@@ -67,9 +67,9 @@ const updateDom = (dom, prevProps, nextProps) => {
   Object.keys(nextProps)
         .filter(name => name !== 'children')
         .forEach(name => {
-          if (name.slice(0, 2) === 'on') {
+          if (name.slice(0, 2) === 'on') { // handle click event
             dom.addEventListener(name.slice(2).toLowerCase(), nextProps[name], false);
-          } else {
+          } else { // mount dom properties
             dom[name] = nextProps[name];
           }
         });
@@ -142,7 +142,6 @@ const commitWork = (fiber) => {
       fiber.props
     );
   } else if (fiber.effectTag === 'DELETION') {
-    // domParent.removeChild(fiber.dom);
     commitDeletion(fiber, domParent);
   } 
 
@@ -327,6 +326,10 @@ const performUnitOfWork = (fiber) => {
  */
 const useState = (init) => {
   const oldHook = wipFiber.base && wipFiber.base.hooks && wipFiber.base.hooks[hookIndex];
+  
+  console.log('oldHook.state: ');
+  console.log(oldHook && oldHook.state ? oldHook.state : '');
+
   const hook = {
     state: oldHook ? oldHook.state : init,
     queue: []
