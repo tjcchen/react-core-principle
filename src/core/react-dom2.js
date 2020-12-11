@@ -10,6 +10,9 @@ let wipRoot        = null;
 let currentRoot    = null;
 // deleted fiber nodes collection
 let deletions      = [];
+// used for useState hook
+let hookIndex      = 0;
+let wipFiber       = null;
 
 /**
  * Create real dom node with virtual dom
@@ -130,7 +133,7 @@ const commitWork = (fiber) => {
 
   const domParent = domParentFiber.dom;
 
-  if (fiber.effectTag === 'REPLACEMENT' && fiber.dom !== null) {
+  if (fiber.effectTag === 'PLACEMENT' && fiber.dom !== null) {
     domParent.appendChild(fiber.dom);
   } else if (fiber.effectTag === 'UPDATE' && fiber.dom != null) {
     updateDom(
@@ -205,7 +208,8 @@ const reconcileChildren = (wipFiber, elements) => {
   let oldFiber = wipFiber.base && wipFiber.base.child;
 
   // build fiber tree with while loop
-  while (index < elements.length || oldFiber !== null) {
+  // TODO: check reconcileChildren code logic - index < elements.length || oldFiber != null
+  while (index < elements.length) {
     let element = elements[index];
     let newFiber = null;
 
@@ -232,7 +236,7 @@ const reconcileChildren = (wipFiber, elements) => {
         dom: null,
         parent: wipFiber,
         base: null,
-        effectTag: 'REPLACEMENT'
+        effectTag: 'PLACEMENT'
       };
     }
 
@@ -317,11 +321,51 @@ const performUnitOfWork = (fiber) => {
 };
 
 /**
+ * Simple useState function. Currently we use array to emulate hooks, but in real world hooks is implemented with LinkedList
+ * 
+ * @param {*} init 
+ */
+const useState = (init) => {
+  const oldHook = wipFiber.base && wipFiber.base.hooks && wipFiber.base.hooks[hookIndex];
+  const hook = {
+    state: oldHook ? oldHook.state : init,
+    queue: []
+  };
+
+  const actions = oldHook ? oldHook.queue : [];
+  actions.forEach(action => {
+    hook.state = action;
+  });
+
+  const setState = (action) => {
+    hook.queue.push(action);
+    wipRoot = {
+      dom: currentRoot.dom,
+      props: currentRoot.props,
+      base: currentRoot
+    };
+
+    nextUnitOfWork = wipRoot;
+    deletions = [];
+  };
+  
+  wipFiber.hooks.push(hook);
+  hookIndex++;
+
+  return [hook.state, setState];
+};
+
+/**
  * Update function component
  * 
  * @param {*} fiber 
  */
 const updateFunctionComponent = (fiber) => {
+  // add useState variables
+  wipFiber = fiber;
+  hookIndex = 0;
+  wipFiber.hooks = [];
+
   const children = [fiber.type(fiber.props)]; // fiber.type is function already
 
   reconcileChildren(fiber, children);
@@ -343,13 +387,12 @@ const updateRegularComponent = (fiber) => {
   //   fiber.parent.dom.appendChild(fiber.dom);
   // }
 
-  const elements = fiber.props.children;
-
   // reconcile current fiber with children fibers
-  reconcileChildren(fiber, elements);
+  reconcileChildren(fiber, fiber.props.children);
 };
 
 // eslint-disable-next-line
 export default {
-  render
+  render,
+  useState
 };
